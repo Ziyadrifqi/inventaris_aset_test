@@ -37,4 +37,14 @@ class Asset extends Model
             default    => 'secondary',
         };
     }
+    public static function nextKode(): string
+    {
+        $last = static::where('kode', 'like', 'AST-%')
+            ->orderByRaw('CAST(SUBSTRING(kode, 5) AS UNSIGNED) DESC')
+            ->value('kode');
+
+        $number = $last ? ((int) substr($last, 4)) + 1 : 1;
+
+        return 'AST-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+    }
 }

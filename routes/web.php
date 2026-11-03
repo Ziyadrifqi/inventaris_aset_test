@@ -13,5 +13,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/', fn() => redirect()->route('assets.index'));
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    Route::middleware('admin')->group(function () {
+        Route::resource('assets', AssetController::class)->except(['index', 'show']);
+    });
+
     Route::resource('assets', AssetController::class)->only(['index', 'show']);
 });
