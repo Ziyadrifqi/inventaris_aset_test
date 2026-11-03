@@ -225,3 +225,23 @@ body {
     padding: .4em .75em;
     border-radius: 999px;
 }
+
+/* ---------- Halaman form ---------- */
+.form-card { max-width: 820px; }
+
+.form-head {
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.form-head h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; margin: 0; }
+.form-body { padding: 1.75rem; }
+.form-foot {
+    padding: 1rem 1.75rem;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+}
+
+@media (max-width: 575.98px) {
+    .form-head, .form-body, .form-foot { padding-inline: 1.25rem; }
+}
