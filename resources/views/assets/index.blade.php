@@ -31,17 +31,6 @@
             padding-left: 2.4rem;
         }
 
-        .asset-code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-            font-size: .82rem;
-            color: var(--muted);
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: .35rem;
-            padding: .15rem .45rem;
-            white-space: nowrap;
-        }
-
         .asset-name {
             font-weight: 600;
             color: var(--ink);
@@ -50,12 +39,6 @@
         .num {
             font-variant-numeric: tabular-nums;
             white-space: nowrap;
-        }
-
-        .badge-soft {
-            font-weight: 500;
-            padding: .4em .7em;
-            border-radius: 999px;
         }
 
         .table-hover>tbody>tr:hover>* {
@@ -93,9 +76,19 @@
         <div>
             <h1 class="mb-1">Daftar Aset</h1>
             <div class="text-muted small">
-                {{ $assets->total() }} aset ditemukan
+                @if ($assets->total() > 0)
+                    Menampilkan {{ $assets->firstItem() }}-{{ $assets->lastItem() }} dari {{ $assets->total() }} aset
+                @else
+                    0 aset ditemukan
+                @endif
             </div>
         </div>
+
+        @if (auth()->user()->isAdmin())
+            <a href="{{ route('assets.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Tambah Aset
+            </a>
+        @endif
     </div>
 
     <form method="GET" class="filter-bar row g-2 mb-3">
@@ -135,6 +128,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
+                        <th style="width: 1%">No</th>
                         <th>Kode</th>
                         <th>Nama</th>
                         <th>Kategori</th>
@@ -147,6 +141,7 @@
                 <tbody>
                     @forelse ($assets as $asset)
                         <tr>
+                            <td class="text-muted num">{{ $assets->firstItem() + $loop->index }}</td>
                             <td><span class="asset-code">{{ $asset->kode }}</span></td>
                             <td class="asset-name">{{ $asset->nama }}</td>
                             <td>{{ $asset->category->nama }}</td>
@@ -162,11 +157,24 @@
                                 <a href="{{ route('assets.show', $asset) }}" class="btn btn-sm btn-detail">
                                     Detail <i class="bi bi-chevron-right small"></i>
                                 </a>
+
+                                @if (auth()->user()->isAdmin())
+                                    <a href="{{ route('assets.edit', $asset) }}" class="btn btn-sm btn-outline-secondary"
+                                        title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Hapus"
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                        data-action="{{ route('assets.destroy', $asset) }}"
+                                        data-label="{{ $asset->kode }} - {{ $asset->nama }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">
+                            <td colspan="8">
                                 <div class="empty-state">
                                     <i class="bi bi-inbox"></i>
                                     Tidak ada aset yang cocok.
@@ -182,4 +190,41 @@
     <div class="mt-3 d-flex justify-content-center justify-content-md-end">
         {{ $assets->links() }}
     </div>
+
+    @if (auth()->user()->isAdmin())
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <form method="POST" id="deleteForm" class="modal-content">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-body text-center p-4">
+                        <span
+                            class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle text-danger mb-3"
+                            style="width:56px;height:56px;font-size:1.6rem">
+                            <i class="bi bi-trash"></i>
+                        </span>
+                        <h2 class="h5 fw-bold">Hapus aset?</h2>
+                        <p class="text-muted mb-0">
+                            <strong id="deleteLabel"></strong><br>
+                            akan dihapus dan tidak bisa dikembalikan.
+                        </p>
+                    </div>
+                    <div class="modal-footer border-0 justify-content-center gap-2 pt-0 pb-4">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Ya, hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        @push('scripts')
+            <script>
+                document.getElementById('deleteModal').addEventListener('show.bs.modal', function(e) {
+                    const btn = e.relatedTarget;
+                    document.getElementById('deleteForm').action = btn.dataset.action;
+                    document.getElementById('deleteLabel').textContent = btn.dataset.label;
+                });
+            </script>
+        @endpush
+    @endif
 @endsection
