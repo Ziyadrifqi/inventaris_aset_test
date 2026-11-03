@@ -1,66 +1,163 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Inventaris Aset Kantor
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web untuk mencatat aset kantor (laptop, monitor, dan sejenisnya).
+Dibuat untuk tes praktik coding (90 menit).
 
-## About Laravel
+**Stack:** PHP 8.2+, Laravel 12, MySQL (XAMPP / phpMyAdmin), Bootstrap 5 (CDN)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Cara Menjalankan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Prasyarat: PHP >= 8.2, Composer, Git, dan XAMPP (MySQL aktif).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. Clone repository
+    ```bash
+    git clone https://github.com/Ziyadrifqi/inventaris_aset_test.git
+    cd inventaris_aset_test
+    ```
+2. Install dependency
+    ```bash
+    composer install
+    ```
+3. Salin file environment dan buat app key
+    ```bash
+    copy .env.example .env      # Windows (Linux/Mac: cp .env.example .env)
+    php artisan key:generate
+    ```
+4. Jalankan **MySQL** di XAMPP Control Panel, lalu buat database kosong
+   bernama `inventaris_aset` lewat phpMyAdmin (`http://localhost/phpmyadmin`).
+   Collation: `utf8mb4_unicode_ci`.
+5. Cek konfigurasi database di `.env` (default XAMPP):
+    ```env
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=inventaris_aset
+    DB_USERNAME=root
+    DB_PASSWORD=
+    ```
+6. Jalankan migration dan seeder
+    ```bash
+    php artisan migrate:fresh --seed
+    ```
+7. Jalankan server
+    ```bash
+    php artisan serve
+    ```
+    Buka http://127.0.0.1:8000 lalu login.
 
-## Learning Laravel
+Catatan: Bootstrap dan ikon dimuat lewat CDN, jadi tidak perlu `npm install`,
+tetapi butuh koneksi internet saat membuka aplikasi.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Akun Demo
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+| Role  | Email              | Password    |
+| ----- | ------------------ | ----------- |
+| Admin | admin@farpoint.com | Password123 |
+| Staff | staff@farpoint.com | Password123 |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Seeder membuat 1 admin, 1 staff, 3 kategori (Laptop, Monitor, Perangkat Lainnya),
+dan 12 aset contoh.
 
-## Laravel Sponsors
+## Hak Akses
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Fitur                                   | Admin | Staff |
+| --------------------------------------- | :---: | :---: |
+| Login / logout                          |  Ya   |  Ya   |
+| Lihat daftar, cari, filter, detail aset |  Ya   |  Ya   |
+| Akses API `/api/assets`                 |  Ya   |  Ya   |
+| Tambah / ubah / hapus aset              |  Ya   | Tidak |
 
-### Premium Partners
+Pembatasan ditegakkan **di sisi server**, bukan hanya dengan menyembunyikan tombol:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+- Middleware `admin` (`AdminOnly`) pada route create, store, edit, update, dan destroy.
+- `authorize()` pada `AssetRequest` (lapis kedua).
 
-## Contributing
+Staff yang membuka `/assets/create` secara langsung akan mendapat **403**.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Fitur
 
-## Code of Conduct
+- Login dan logout; semua halaman hanya untuk pengguna yang sudah login.
+- Daftar aset: pagination 10 per halaman, pencarian nama/kode, filter kategori
+  dan status. Nama kategori dimuat dengan eager loading (`with('category')`)
+  sehingga tidak ada N+1 query. Filter tetap terbawa saat pindah halaman.
+- CRUD aset (admin) dengan modal konfirmasi sebelum hapus.
+- Validasi: kode unik, nama wajib, nilai numerik >= 0, kategori harus ada.
+  Pesan error tampil di form dan isian lama tidak hilang.
+- Tampilan responsif dengan Bootstrap 5 (navbar, tabel responsif, form rapi,
+  pesan sukses setelah simpan atau hapus).
+- API JSON berpaginasi.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## API
 
-## Security Vulnerabilities
+```
+GET /api/assets
+GET /api/assets?status=tersedia
+GET /api/assets?status=dipinjam&page=2
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- Mengembalikan JSON berpaginasi (10 per halaman) berisi `kode`, `nama`,
+  `kategori`, dan `status`.
+- Nilai `status` yang valid: `tersedia`, `dipinjam`, `rusak`.
+  Nilai lain menghasilkan respons **422**.
+- Endpoint memakai session login, jadi harus login dulu di browser.
 
-## License
+Contoh respons (dipersingkat):
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```json
+{
+    "data": [
+        {
+            "kode": "AST-001",
+            "nama": "Laptop Dell Latitude 5440",
+            "kategori": "Laptop",
+            "status": "tersedia"
+        }
+    ],
+    "links": { "...": "..." },
+    "meta": { "current_page": 1, "per_page": 10, "total": 12 }
+}
+```
+
+## Struktur Singkat
+
+```
+app/Http/Controllers/AuthController.php      login & logout
+app/Http/Controllers/AssetController.php     daftar, detail, CRUD
+app/Http/Controllers/AssetApiController.php  API JSON
+app/Http/Middleware/AdminOnly.php            pembatas role admin
+app/Http/Requests/AssetRequest.php           validasi + otorisasi
+app/Http/Resources/AssetResource.php         format JSON API
+app/Models/{User,Category,Asset}.php
+database/migrations, database/seeders
+resources/views/{layouts,partials,auth,assets}
+public/css/app.css
+```
+
+## Testing
+
+```bash
+php artisan test
+```
+
+Test memakai SQLite in-memory (bawaan `phpunit.xml`). Jika muncul error
+"could not find driver", aktifkan `extension=pdo_sqlite` dan `extension=sqlite3`
+di `php.ini` XAMPP.
+
+## Asumsi yang Diambil
+
+- Autentikasi dibuat manual (login/logout saja, tanpa Breeze) agar tidak
+  bercampur dengan Tailwind bawaan Breeze. Tidak ada registrasi; user dibuat lewat seeder.
+- Role disimpan sebagai kolom `role` (`admin` atau `staff`) di tabel `users`.
+- `/api/assets` diletakkan di `routes/web.php` dengan middleware `auth`
+  (autentikasi session), konsisten dengan aturan "semua halaman hanya untuk
+  pengguna yang sudah login".
+- Semua kolom aset wajib diisi. Tanggal beli tidak boleh di masa depan.
+- Hapus aset bersifat permanen (hard delete).
+- Bootstrap 5 dimuat lewat CDN.
+- Kode aset diinput manual oleh admin dan divalidasi unik.
+
+## Status Fitur
+
+**Requirement wajib:** semua selesai (setup & seeder, autentikasi & role,
+CRUD dengan pembatasan server-side, daftar aset dengan pencarian/filter/pagination
+tanpa N+1, validasi, tampilan responsif, API).
