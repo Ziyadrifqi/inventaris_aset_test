@@ -1,6 +1,4 @@
-@extends('layouts.app')
-@section('title', 'Login')
-
+@extends('layouts.guest')
 @push('styles')
     <style>
         .login-wrapper {
