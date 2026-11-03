@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,6 +10,8 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', fn() => view('home'));
+    Route::get('/', fn() => redirect()->route('assets.index'));
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::resource('assets', AssetController::class)->only(['index', 'show']);
 });
