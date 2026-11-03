@@ -12,8 +12,19 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create(['name' => 'Admin', 'email' => 'admin@farpoint.com', 'Password123' => Hash::make('password'), 'role' => 'admin']);
-        User::create(['name' => 'Staff', 'email' => 'staff@farpoint.com', 'Password123' => Hash::make('password'), 'role' => 'staff']);
+        User::create([
+            'name'     => 'Admin',
+            'email'    => 'admin@farpoint.com',
+            'password' => Hash::make('Password123'),
+            'role'     => 'admin',
+        ]);
+
+        User::create([
+            'name'     => 'Staff',
+            'email'    => 'staff@farpoint.com',
+            'password' => Hash::make('Password123'),
+            'role'     => 'staff',
+        ]);
 
         $cats = [];
         foreach (['Laptop', 'Monitor', 'Perangkat Lainnya'] as $nama) {
